@@ -1,5 +1,0 @@
-﻿  lr1.cpp
-C:\Users\egorc\source\repos\lr1\lr1\lr1.cpp(286,15): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
-  lr1.vcxproj -> C:\Users\egorc\source\repos\lr1\Debug\lr1.exe
-  "pwsh.exe" не является внутренней или внешней
-  командой, исполняемой программой или пакетным файлом.
