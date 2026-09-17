@@ -12,7 +12,31 @@ struct node
 
 struct node* head = NULL;
 struct node* last = NULL;
+void reverse_queue()
+{
+    struct node* prev = NULL;
+    struct node* curr = head;
+    struct node* next = NULL;
+    struct node* old_head = head;
 
+    if (head == NULL)
+    {
+        printf("Очередь пуста\n");
+        return;
+    }
+
+    while (curr != NULL)
+    {
+        next = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = next;
+    }
+
+    head = prev;
+    last = old_head;
+    last->next = NULL;
+}
 void add()
 {
     struct node* p;
@@ -76,7 +100,7 @@ void review()
     {
         printf("%d. %s\n", i, p->inf);
         p = p->next;
-        i++; 
+        i++;
     }
 }
 
@@ -85,22 +109,24 @@ void find()
     char name[50];
     struct node* p = head;
     int i = 1;
-
+    int found = 0;
     printf("Введите название элемента ");
     scanf_s("%s", name, (unsigned)sizeof(name));
 
     while (p != NULL)
     {
-        if (strcmp(name, p->inf) == 0)
+        if (strstr(p->inf, name) != NULL)
         {
             printf("Элемент есть в очереди %s под номером %d\n", p->inf, i);
-            return;
+            found = 1;
         }
         i++;
         p = p->next;
     }
-
-    printf("Элемент не найден\n");
+    if (!found)
+    {
+        printf("Элемент не найден\n");
+    }
 }
 
 void clear()
@@ -124,7 +150,7 @@ int main()
     int choice;
 
     while (1) {
-        printf("Выберете действие и введите его номер.\n 1 - добавить элемент в очередь\n 2 - вывести очередь\n 3 - найти элемент в очереди\n 4 - удалить элемент из очереди\n 5 - очистить очередь\n 6 - выход\n");
+        printf("Выберете действие и введите его номер.\n 1 - добавить элемент в очередь\n 2 - вывести очередь\n 3 - найти элемент в очереди\n 4 - удалить элемент из очереди\n 5 - очистить очередь\n 6 - выход\n 7 - перевернуть\n");
         scanf_s("%d", &choice);
 
         switch (choice)
@@ -152,6 +178,9 @@ int main()
         case 6:
             return 0;
 
+        case 7:
+            reverse_queue();
+            break;
         default:
             printf("Некорректный символ\n");
         }
