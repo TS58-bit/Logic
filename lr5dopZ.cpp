@@ -123,11 +123,79 @@ void typevertex(int** g, int n) {
         printf("\n");
     }
 }
+void printIncidenceMatrix(int** g, int n) {
+    if (g == NULL) {
+        printf("Граф ещё не был создан\n");
+        return;
+    }
+
+    // Сначала считаем количество рёбер
+    int edgeCount = 0;
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            if (g[i][j] == 1) edgeCount++;
+
+    if (edgeCount == 0) {
+        printf("Матрица инцидентности: рёбер нет.\n");
+        return;
+    }
+
+    // Выделяем простой массив рёбер: храним пары (u, v)
+    int* eu = (int*)malloc(edgeCount * sizeof(int));
+    int* ev = (int*)malloc(edgeCount * sizeof(int));
+
+    int idx = 0;
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            if (g[i][j] == 1) {
+                eu[idx] = i;
+                ev[idx] = j;
+                idx++;
+            }
+
+    printf("\nМатрица инцидентности:\n");
+
+    // Заголовки столбцов (номера рёбер)
+    printf("     ");
+    
+    printf("\n");
+
+    for (int i = 0; i < n; i++) {
+        
+        for (int k = 0; k < edgeCount; k++) {
+            int u = eu[k];
+            int v = ev[k];
+
+            if (u == i && v == i) {
+                // петля: стандартно ставят 2
+                printf("%3d ", 2);
+            }
+            else if (u == i) {
+                // исходящее ребро: -1
+                printf("%3d ", -1);
+            }
+            else if (v == i) {
+                // входящее ребро: +1
+                printf("%3d ", 1);
+            }
+            else {
+                printf("%3d ", 0);
+
+
+}
+        }
+        printf("\n");
+    }
+
+    free(eu);
+    free(ev);
+}
 
 int main() {
     setlocale(LC_ALL, "Russian");
     srand(time(NULL));
-
+    int m = 0;
+    int** inc = NULL;
     int** g = NULL;
     int n = 0, r;
     int choice;
@@ -157,8 +225,8 @@ int main() {
 
         case 3:
             printGraph(g, n);
+            printIncidenceMatrix(g, n);
             break;
-
         case 4:
             r = rcount(g, n);
             printf("Количество рёбер: %d\n", r);
