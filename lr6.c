@@ -17,24 +17,37 @@ void zeroMatrix(int n, int m[MAX][MAX]) {
 
 void printMatrix(int n, int m[MAX][MAX]) {
     printf("    ");
-    for (int j = 0; j < n; j++)
+    for (int j = 0; j < n; j++) {
+        if (m[j][j] == -1) {
+            continue;
+        }
         printf("%3d", j + 1);
+    }
     printf("\n");
 
     for (int i = 0; i < n; i++) {
+        if (m[i][i] == -1) {
+            continue;
+        }
         printf("%3d ", i + 1);
-        for (int j = 0; j < n; j++)
+        for (int j = 0; j < n; j++) {
+            if (m[i][j] == -1) {
+                continue;
+            }
             printf("%3d", m[i][j]);
+        }
         printf("\n");
     }
 }
 
 void printAdjList(int n, int m[MAX][MAX]) {
     for (int i = 0; i < n; i++) {
+        if (m[i][i] == -1)          
+            continue;
         printf("%d:", i + 1);
 
         for (int j = 0; j < n; j++) {
-            if (m[i][j])
+            if (m[i][j] == 1)
                 printf(" %d", j + 1);
         }
 
@@ -44,12 +57,18 @@ void printAdjList(int n, int m[MAX][MAX]) {
 
 /* ---------- Генерация графа ---------- */
 
-void generateGraph(int n, int m[MAX][MAX]) {
+void generateGraph(int n, int m[MAX][MAX], int r) {
     zeroMatrix(n, m);
-
+    if (r < 1 || r > 100) {
+        printf("Вероятность должна быть от 1 до 100");
+        return;
+    }
     for (int i = 0; i < n; i++) {
         for (int j = i + 1; j < n; j++) {
-            m[i][j] = rand() % 2;
+            m[i][j] = (rand() % 101) / r;
+            if (m[i][j] >= 1) {
+                m[i][j] = 1;
+            }
             m[j][i] = m[i][j];
         }
     }
@@ -146,21 +165,15 @@ void splitVertex(int n, int m[MAX][MAX],
 
     int cnt = 0;
 
-    /* Удаляем связи старой вершины */
-    for (int i = 0; i < n; i++) {
-        res[v][i] = 0;
-        res[i][v] = 0;
-    }
+
 
     /* Делим соседей между двумя вершинами */
     for (int u = 0; u < n; u++) {
         if (u == v || !m[v][u])
             continue;
+        res[v][u] = res[u][v] = 1;
 
-        if (cnt % 2 == 0)
-            res[v][u] = res[u][v] = 1;
-        else
-            res[n][u] = res[u][n] = 1;
+        res[n][u] = res[u][n] = 1;
 
         cnt++;
     }
@@ -172,33 +185,94 @@ void splitVertex(int n, int m[MAX][MAX],
 /* ---------- Операции над графами ---------- */
 
 void unionGraphs(int n, int a[MAX][MAX],
-    int b[MAX][MAX], int res[MAX][MAX]) {
-
+    int b[MAX][MAX], int res[MAX][MAX], int* newN) {
+    int cnt = 0;
     zeroMatrix(n, res);
 
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
             res[i][j] = a[i][j] || b[i][j];
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (res[i][j] <= 0) {
+                cnt += 1;
+            }
+            if (cnt == n) {
+                for (int g = 0; g < n; g++) {
+                    res[i][j - g] = -1;
+                    res[g][i] = -1;
+                }
+
+            }
+        }
+
+        cnt = 0;
+    }
+    int removed = 0;
+    for (int i = 0; i < n; i++)
+        if (res[i][i] == -1) removed++;
+    *newN = n - removed;
 }
 
 void intersectionGraphs(int n, int a[MAX][MAX],
-    int b[MAX][MAX], int res[MAX][MAX]) {
-
+    int b[MAX][MAX], int res[MAX][MAX], int* newN) {
+    int cnt = 0;
     zeroMatrix(n, res);
 
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
             res[i][j] = a[i][j] && b[i][j];
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (res[i][j] <= 0) {
+                cnt += 1;
+            }
+            if (cnt == n) {
+                for (int g = 0; g < n; g++) {
+                    res[i][j - g] = -1;
+                    res[g][i] = -1;
+                }
+
+            }
+        }
+
+        cnt = 0;
+    }
+    int removed = 0;
+    for (int i = 0; i < n; i++)
+        if (res[i][i] == -1) removed++;
+    *newN = n - removed;
 }
 
 void ringSumGraphs(int n, int a[MAX][MAX],
-    int b[MAX][MAX], int res[MAX][MAX]) {
-
+    int b[MAX][MAX], int res[MAX][MAX], int* newN) {
+    int cnt = 0;
+    
     zeroMatrix(n, res);
 
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
             res[i][j] = a[i][j] ^ b[i][j];
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (res[i][j] <= 0) {
+                cnt += 1;
+            }
+            if (cnt == n) {
+                for (int g = 0; g < n; g++) {
+                    res[i][j - g] = -1;
+                    res[g][i] = -1;
+                }
+
+            }
+        }
+
+        cnt = 0;
+    }
+    int removed = 0;
+    for (int i = 0; i < n; i++)
+        if (res[i][i] == -1) removed++;
+    *newN = n - removed;
 }
 
 /* ---------- Декартово произведение ---------- */
@@ -298,6 +372,59 @@ void vertexMenu(int n, int m[MAX][MAX], int useList) {
         printMatrix(newN, R);
 }
 
+void printCartesianDetails(int n1, int n2,
+    int a[MAX][MAX], int b[MAX][MAX]) {
+    int total = n1 * n2;
+
+    /* ---------- Вершины ---------- */
+    printf("\nВершины декартова произведения G1 x G2:\n");
+    printf("Формат: N -> (G1, G2)\n\n");
+
+    for (int v = 0; v < total; v++) {
+        int i = v / n2;
+        int j = v % n2;
+        printf("%3d -> (%d, %d)\n", v + 1, i + 1, j + 1);
+    }
+
+    /* ---------- Рёбра ---------- */
+    printf("\nРёбра декартова произведения G1 x G2:\n");
+    printf("Формат: N (G1,G2) -- M (G1,G2)\n\n");
+
+    int edgeCount = 0;
+
+    for (int v1 = 0; v1 < total; v1++) {
+        int i1 = v1 / n2;
+        int j1 = v1 % n2;
+
+        for (int v2 = v1 + 1; v2 < total; v2++) {
+            int i2 = v2 / n2;
+            int j2 = v2 % n2;
+
+            int isEdge = 0;
+            const char* src = "";
+
+            if (j1 == j2 && a[i1][i2]) {
+                isEdge = 1;
+
+            }
+            else if (i1 == i2 && b[j1][j2]) {
+                isEdge = 1;
+
+            }
+
+            if (isEdge) {
+                printf("%3d (%d,%d) -- %3d (%d,%d)   \n",
+                    v1 + 1, i1 + 1, j1 + 1,
+                    v2 + 1, i2 + 1, j2 + 1
+                );
+                edgeCount++;
+            }
+        }
+    }
+
+    printf("\nВсего рёбер: %d\n", edgeCount);
+}
+
 /* ---------- Главная программа ---------- */
 
 int main(void) {
@@ -305,10 +432,12 @@ int main(void) {
     setlocale(LC_ALL, "Russian");
 
     int n = 0;
+    int n1 = 0;
+    int nmax = 0;
     int M1[MAX][MAX] = { 0 };
     int M2[MAX][MAX] = { 0 };
     int R[MAX][MAX] = { 0 };
-
+    int r = 0;
     int newN = 0;
     int choice;
     int created = 0;
@@ -344,16 +473,46 @@ int main(void) {
                 created = 0;
                 break;
             }
+            printf("Введите значение рандома в процентах(1-100) ");
+            if (scanf("%d", &r) != 1 || r < 1 || r > 100) {
+                printf("r должно быть от 1 до 100!\n");
+                n = 0; created = 0;
+                break;
+            }
+            generateGraph(n, M1, r);
+            printf("Введите количество вершин (2-%d): ", MAX);
 
-            generateGraph(n, M1);
-            generateGraph(n, M2);
+            if (scanf("%d", &n1) != 1)
+                goto finish;
+
+            if (n1 < 2 || n1 > MAX) {
+                printf("Количество вершин должно быть от 2 до %d!\n",
+                    MAX);
+                n1 = 0;
+                created = 0;
+                break;
+            }
+            printf("Введите значение рандома в процентах(1-100) ");
+            
+            if (scanf("%d", &r) != 1 || r < 1 || r > 100) {
+                printf("r должно быть от 1 до 100!\n");
+                n = 0; created = 0;
+                break;
+            }
+            generateGraph(n1, M2, r);
+            if (n > n1) {
+                nmax = n;
+            }
+            else {
+                nmax = n1;
+            }
             created = 1;
 
             printf("\nМатрица смежности G1:\n");
             printMatrix(n, M1);
 
             printf("\nМатрица смежности G2:\n");
-            printMatrix(n, M2);
+            printMatrix(n1, M2);
             break;
 
         case 2:
@@ -366,7 +525,7 @@ int main(void) {
             printMatrix(n, M1);
 
             printf("\nМатрица M2:\n");
-            printMatrix(n, M2);
+            printMatrix(n1, M2);
             break;
 
         case 3:
@@ -379,7 +538,7 @@ int main(void) {
             printAdjList(n, M1);
 
             printf("\nСписок смежности G2:\n");
-            printAdjList(n, M2);
+            printAdjList(n1, M2);
             break;
 
         case 4:
@@ -399,7 +558,7 @@ int main(void) {
             if (graphChoice == 1)
                 vertexMenu(n, M1, choice == 5);
             else if (graphChoice == 2)
-                vertexMenu(n, M2, choice == 5);
+                vertexMenu(n1, M2, choice == 5);
             else
                 printf("Неверный номер графа!\n");
 
@@ -415,19 +574,19 @@ int main(void) {
             }
 
             if (choice == 6) {
-                unionGraphs(n, M1, M2, R);
+                unionGraphs(nmax, M1, M2, R, &newN);
                 printf("\nОбъединение G1 U G2:\n");
             }
             else if (choice == 7) {
-                intersectionGraphs(n, M1, M2, R);
+                intersectionGraphs(nmax, M1, M2, R, &newN);
                 printf("\nПересечение G1 и G2:\n");
             }
             else {
-                ringSumGraphs(n, M1, M2, R);
+                ringSumGraphs(nmax, M1, M2, R, &newN);
                 printf("\nКольцевая сумма G1 и G2:\n");
             }
 
-            printMatrix(n, R);
+            printMatrix(nmax, R);
             break;
 
         case 9:
@@ -436,18 +595,19 @@ int main(void) {
                 break;
             }
 
-            if (n * n > MAX) {
+            if (n * n1 > MAX) {
                 printf("Результат содержит %d вершин, "
                     "но матрица рассчитана максимум на %d.\n",
-                    n * n, MAX);
+                    n * n1, MAX);
                 printf("Создайте графы с меньшим числом вершин.\n");
                 break;
             }
 
-            cartesianProduct(n, M1, n, M2, R, &newN);
+            cartesianProduct(n, M1, n1, M2, R, &newN);
 
             printf("\nДекартово произведение G1 x G2:\n");
             printMatrix(newN, R);
+            printCartesianDetails(n, n1, M1, M2);
             break;
 
         case 0:
