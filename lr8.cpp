@@ -5,7 +5,7 @@
 #include <locale.h>
 #include <queue>
 
-#define MAX 300
+#define MAX 3000
 
 int NUM[MAX];
 int deg[MAX];
@@ -68,13 +68,13 @@ void printSP(int n, int M[MAX][MAX]) {
     for (int i = 0; i < n; i++) {
         printf("%d.", i + 1);
         for (int j = 0; j < deg[i]; j++) {
-            printf(" %d", M[i][j] + 1); 
+            printf(" %d", M[i][j] + 1);
         }
         printf("\n");
     }
-    
+
 }
-void generateGraf(int n, int G[MAX][MAX], int M[MAX][MAX], int r){
+void generateGraf(int n, int G[MAX][MAX], int M[MAX][MAX], int r) {
     for (int i = 0; i < n; i++) {
         deg[i] = 0;
         for (int j = 0; j < n; j++) {
@@ -119,7 +119,7 @@ void POH(int n, int G[MAX][MAX]) {
         if (NUM[i] == 0)
             BFS(G, n, i);
     }
-    
+
 }
 void BFS_SP(int M[MAX][MAX], int n, int i) {
     std::queue<int> Q;
@@ -131,7 +131,7 @@ void BFS_SP(int M[MAX][MAX], int n, int i) {
         printf("%d ", i + 1);
         for (int j = 0; j < deg[i]; j++) {
             int u = M[i][j];
-            if (NUM[u]== 0) {
+            if (NUM[u] == 0) {
                 Q.push(u);
                 NUM[u] = 1;
             }
@@ -152,7 +152,7 @@ void BFS_QLIST(int G[MAX][MAX], int n, int i) {
     initQueue(&Q);
     pushQueue(&Q, i);
     NUM[i] = 1;
-    while(!isEmpty(&Q)) {
+    while (!isEmpty(&Q)) {
         i = popQueue(&Q);
         printf("%d ", i + 1);
         for (int j = 0; j < n; j++) {
@@ -171,6 +171,32 @@ void POH_QLIST(int n, int G[MAX][MAX]) {
             BFS_QLIST(G, n, i);
     }
 }
+void BFS_SP_QLIST(int G[MAX][MAX], int n, int i) {
+    ListQueue Q;
+    initQueue(&Q);
+    pushQueue(&Q, i);
+    NUM[i] = 1;
+    while (!isEmpty(&Q)) {
+        i = popQueue(&Q);
+        printf("%d ", i + 1);
+        for (int j = 0; j < n; j++) {
+            if (G[i][j] == 1 && NUM[j] == 0) {
+                pushQueue(&Q, j);
+                NUM[j] = 1;
+            }
+        }
+    }
+}
+void POH_QLIST_SP(int n, int M[MAX][MAX]) {
+    for (int i = 0; i < n; i++)
+        NUM[i] = 0;
+    for (int i = 0; i < n; i++) {
+        if (NUM[i] == 0)
+            BFS_SP_QLIST(M, n, i);
+    }
+
+}
+
 int main(void) {
     srand((unsigned int)time(NULL));
     setlocale(LC_ALL, "Russian");
@@ -186,7 +212,8 @@ int main(void) {
         printf("2 - Обход в ширину по матрице\n");
         printf("3 - Обход в ширину по спискам смежности\n");
         printf("4 - Обход в ширину по матрице с помощью очереди через список\n");
-        printf("5 - Сравнение скорости\n");
+        printf("5 - Обход в ширину по спискам с помощью очереди через список\n");
+        printf("6 - Сравнение скорости\n");
         printf("0 - Выход\n");
         printf("Ваш выбор: ");
         scanf_s("%d", &choice);
@@ -219,11 +246,17 @@ int main(void) {
             break;
         }
         case 5: {
+            POH_QLIST_SP(n, M);
+            break;
+        }
+        case 6: {
             int in[5];
             double ResQue[5];
+            double ResQueSP[5];
             double ResList[5];
+            double ResListSP[5];
             int cnt = 0;
-            for (int i = 100; i <= 300; i += 50) {
+            for (int i = 1000; i <= 3000; i += 500) {
                 printf("\nНа %d:\n", i);
                 generateGraf(i, G, M, r);
                 printf("Время на Queue:\n");
@@ -238,6 +271,16 @@ int main(void) {
                 end = clock();
                 printf("\nВремя: %.3fs \n", ((double)(end - start) / CLOCKS_PER_SEC));
                 ResList[cnt] = (double)(end - start) / CLOCKS_PER_SEC;
+                start = clock();
+                POH_SP(i, G);
+                end = clock();
+                printf("\nВремя: %.3fs \n", ((double)(end - start) / CLOCKS_PER_SEC));
+                ResQueSP[cnt] = (double)(end - start) / CLOCKS_PER_SEC;
+                start = clock();
+                POH_QLIST_SP(i, G);
+                end = clock();
+                printf("\nВремя: %.3fs \n", ((double)(end - start) / CLOCKS_PER_SEC));
+                ResListSP[cnt] = (double)(end - start) / CLOCKS_PER_SEC;
                 in[cnt] = i;
                 cnt++;
 
@@ -245,7 +288,9 @@ int main(void) {
             for (int i = 0; i < cnt; i++) {
                 printf("Замер номер %d на %d\n", i + 1, in[i]);
                 printf("Queue %.3fs: \n", ResQue[i]);
+                printf("QueueSP %.3fs: \n", ResQueSP[i]);
                 printf("ListQueue %.3fs: \n", ResList[i]);
+                printf("ListQueueSP %.3fs: \n", ResListSP[i]);
             }
             break;
         }
@@ -255,7 +300,7 @@ int main(void) {
         default:
             printf("Неверный выбор. Попробуйте снова.\n");
             break;
-        } 
+        }
     }
     return 0;
 }
