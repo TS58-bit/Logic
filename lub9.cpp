@@ -7,7 +7,7 @@
 #include <locale.h>
 #include <queue>
 
-#define REPEATS 500
+#define REPEATS 5
 #define MAX_VERTICES 100
 
 typedef struct Node {
@@ -63,7 +63,7 @@ void printGraph(int** g, int n) {
     }
 }
 
-void randGraph(int** g, int n) {
+void randGraph(int** g, int n, int r) {
     if (g == NULL) {
         printf("Граф ещё не был создан\n");
         return;
@@ -74,7 +74,7 @@ void randGraph(int** g, int n) {
     }
     for (int i = 0; i < n; i++) {
         for (int j = i + 1; j < n; j++) {
-            g[i][j] = rand() % 2;
+            g[i][j] = (rand() % 100 < r) ? 1 : 0;
             g[j][i] = g[i][j];
         }
     }
@@ -239,7 +239,7 @@ void dfsList(Node** gl, int n, int start, int* dist) {
 }
 
 void measureTime() {
-    int sizes[] = { 10, 20, 30, 40, 50 };
+    int sizes[] = { 100, 200, 300, 400, 500, 1000 };
     int sizeCount = sizeof(sizes) / sizeof(sizes[0]);
 
     printf("Сравнение времени работы алгоритмов\n");
@@ -260,7 +260,7 @@ void measureTime() {
         }
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
-                g[i][j] = rand() % 2;
+                g[i][j] = (rand() % 100 < 50) ? 1 : 0;
                 g[j][i] = g[i][j];
             }
         }
@@ -396,8 +396,10 @@ int main() {
                 printf("Граф ещё не создан\n");
                 break;
             }
-
-            randGraph(g, n);
+            int r;
+            printf("Введите вероятность появления ребра\n");
+            scanf_s("%d", &r);
+            randGraph(g, n, r);
             graphReady = true;
             break;
         }
